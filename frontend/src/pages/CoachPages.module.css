@@ -1,0 +1,113 @@
+.choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 20px 0 28px;
+}
+.choices button {
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  gap: 8px;
+  min-height: 120px;
+  background: var(--surface);
+}
+.choices strong {
+  font-size: 14px;
+}
+.choices small {
+  font-size: 12px;
+  color: var(--muted);
+}
+.choices .chosen {
+  background: var(--brand-soft);
+  border-color: var(--brand);
+  outline: 1px solid var(--brand);
+}
+.duration {
+  display: flex;
+  gap: 8px;
+  margin: 16px 0;
+}
+.duration button {
+  flex: 1;
+  min-height: 48px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  font-size: 14px;
+}
+.duration button[aria-pressed='true'] {
+  background: var(--brand);
+  color: var(--on-brand);
+}
+.chat {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin: 20px 0;
+}
+.message {
+  align-self: flex-start;
+  max-width: 92%;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px 18px 18px 4px;
+  font-size: 15px;
+  overflow-wrap: anywhere;
+}
+.message small {
+  display: block;
+  color: var(--brand);
+  font-size: 11px;
+  margin-bottom: 8px;
+}
+.user {
+  align-self: flex-end;
+  background: var(--brand-soft);
+  border-color: transparent;
+  border-radius: 18px 18px 4px 18px;
+}
+.replies {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 20px 0;
+}
+.replies button {
+  padding: 9px 12px;
+  min-height: 44px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  font-size: 13px;
+}
+.compose {
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+}
+.compose input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+}
+.compose button {
+  width: 48px;
+  min-width: 48px;
+  height: 48px;
+  background: var(--brand);
+  color: var(--on-brand);
+  border-radius: 13px;
+}
+.compose button:disabled {
+  opacity: 0.4;
+}

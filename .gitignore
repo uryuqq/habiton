@@ -1,0 +1,14 @@
+# В репозиторий приложения включаем только исходники и документацию разработки.
+/*
+!/.gitignore
+!/README.md
+!/frontend/
+!/backend/
+!/.github/
+node_modules/
+dist/
+.DS_Store
+.env
+.env.*
+!.env.example
+*.log
