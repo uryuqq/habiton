@@ -51,14 +51,14 @@ export function createDemoData() {
   }
   logs.push({ habitId: 'water', date: today })
   return {
-    profile: { name: 'Алексей', email: 'alex@example.com' },
+    profile: { name: 'Алексей', email: 'alex@example.com', role: 'admin' },
     habits,
     logs,
     dialogues: [],
     users: [
-      { id: 'u1', email: 'alex@example.com', blocked: false },
-      { id: 'u2', email: 'maria@example.com', blocked: false },
-      { id: 'u3', email: 'test@example.com', blocked: true },
+      { id: 'u1', email: 'alex@example.com', role: 'admin', blocked: false },
+      { id: 'u2', email: 'maria@example.com', role: 'user', blocked: false },
+      { id: 'u3', email: 'test@example.com', role: 'user', blocked: true },
     ],
     templates: [
       {

@@ -26,6 +26,14 @@ export function ProfilePage() {
     },
     { to: '/garden', title: 'Мой сад', subtitle: 'Ваш накопленный рост', icon: Leaf },
   ]
+  if (data.profile.role === 'admin') {
+    sections.push({
+      to: '/admin',
+      title: 'Панель администратора',
+      subtitle: 'Пользователи, шаблоны и журнал',
+      icon: ShieldCheck,
+    })
+  }
   function confirmAction() {
     if (confirm === 'logout') {
       setSession(null)
@@ -40,6 +48,7 @@ export function ProfilePage() {
         <div style={{ flex: 1 }}>
           <h2>{data.profile.name}</h2>
           <p className={p.muted}>{data.profile.email}</p>
+          {data.profile.role === 'admin' && <small className={p.muted}>Администратор</small>}
         </div>
       </div>
       <div className={p.list}>

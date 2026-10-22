@@ -18,6 +18,18 @@ export function AppProvider({ children }) {
   const [toast, setToast] = useState('')
   const today = dateKey(new Date(clock), settings.timezone)
   useEffect(() => {
+    // Добавляем роль в прежние сохранения, не сбрасывая привычки и отметки на телефоне.
+    if (data.profile.role) return
+    setData((current) => ({
+      ...current,
+      profile: { ...current.profile, role: 'admin' },
+      users: current.users.map((user) => ({
+        ...user,
+        role: user.role || (user.id === 'u1' ? 'admin' : 'user'),
+      })),
+    }))
+  }, [data.profile.role, setData])
+  useEffect(() => {
     const timer = setInterval(() => setClock(Date.now()), 60000)
     return () => clearInterval(timer)
   }, [])
@@ -143,7 +155,7 @@ export function AppProvider({ children }) {
     setToast('Изменение сохранено')
   }
   function startDemo(role = 'user', email) {
-    setSession({ role })
+    setSession({ role: data.profile.role || role })
     if (email) setData((current) => ({ ...current, profile: { ...current.profile, email } }))
   }
   function resetDemo() {

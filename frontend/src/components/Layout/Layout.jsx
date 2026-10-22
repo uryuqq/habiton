@@ -86,6 +86,9 @@ export function Layout() {
             <h1>Администрирование</h1>
             <p>Хабитон</p>
           </div>
+          <Link to="/today" className={s.returnLink}>
+            В приложение
+          </Link>
         </header>
       )}
       <div className={withNavigation ? s.workspace : ''}>

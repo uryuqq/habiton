@@ -105,7 +105,7 @@ export function AdminUsersPage() {
             <tr key={user.id}>
               <td data-label="Email">
                 {user.email}
-                <small>Пользователь</small>
+                <small>{user.role === 'admin' ? 'Администратор' : 'Пользователь'}</small>
               </td>
               <td data-label="Статус">{user.blocked ? 'Заблокирован' : 'Активен'}</td>
               <td data-label="Действие">

@@ -18,6 +18,18 @@
   color: var(--muted);
   margin-top: 5px;
 }
+.returnLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--brand);
+  font-size: 14px;
+  text-decoration: none;
+}
 .avatar {
   width: 48px;
   height: 48px;
