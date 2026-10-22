@@ -1,13 +1,9 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router'
-import { usePwa } from '../hooks/usePwa'
 import { useApp } from '../context/AppContext'
 import { BackHeader, Badge, Button, Card, EmptyState, PageTitle, Plant } from '../components/UI/UI'
-import { screenLinks } from '../routing/paths'
 import p from './Pages.module.css'
 
 export function InstallPage() {
-  const { ready } = usePwa()
   const [prompt, setPrompt] = useState(null)
   const [installed, setInstalled] = useState(
     window.matchMedia('(display-mode: standalone)').matches || Boolean(navigator.standalone),
@@ -68,22 +64,6 @@ export function InstallPage() {
             ))}
           </div>
         </Card>
-        <p className={p.note}>
-          Для установки и офлайн-режима на телефоне нужен доступный HTTPS-адрес. Адрес localhost
-          относится только к устройству, на котором он открыт.
-        </p>
-        <p role="status" className={p.note}>
-          {ready
-            ? 'Офлайн-режим готов. Можно закрыть приложение и проверить запуск без сети.'
-            : 'Офлайн-режим готовится после открытия собранной HTTPS-версии.'}
-        </p>
-        <Card>
-          <h3>Что можно проверить</h3>
-          <p className={p.muted}>
-            Иконку, запуск отдельным окном, обе темы, создание привычек и локальное сохранение.
-            После первого открытия дождитесь сообщения о готовности офлайн-режима.
-          </p>
-        </Card>
         {message && (
           <p role="status" className={p.note}>
             {message}
@@ -98,31 +78,24 @@ export function DataPage() {
     <>
       <BackHeader title="О ваших данных" to="/profile" />
       <div className={p.page}>
-        <PageTitle
-          title="Понятно, что остаётся с нами"
-          subtitle="Как работает текущая демонстрационная версия."
-        />
+        <PageTitle title="Понятно, что остаётся с нами" subtitle="Что сохраняется и зачем." />
         <div className={p.stack}>
           {[
             [
-              'На этом устройстве',
-              'Привычки, отметки, настройки и диалоги сохраняются в хранилище браузера. Очистка данных сайта удалит их.',
-            ],
-            [
               'Учётная запись',
-              'Настоящей регистрации нет. Введённый пароль не сохраняется и не отправляется. Используйте вымышленные данные.',
+              'Имя и email используются в профиле. Пароль не сохраняется на устройстве.',
             ],
             [
-              'Диалог с помощником',
-              'Внешняя языковая модель не подключена. Ответы создаются по локальному демонстрационному сценарию.',
+              'Привычки и отметки',
+              'Расписание и история сохраняются в этом браузере, чтобы показывать ваш прогресс. Очистка данных сайта удалит их.',
             ],
             [
-              'Демонстрационная админка',
-              'Не управляет реальными пользователями. Защита ролей на клиенте показывает будущий сценарий и не заменяет серверную проверку.',
+              'Диалоги',
+              'Историю сообщений можно открыть в разделе помощника. Она сохраняется на этом устройстве.',
             ],
             [
-              'Будущая версия',
-              'После подключения Laravel данные будут храниться в MySQL. Состав передаваемых данных и правила удаления потребуется описать отдельно.',
+              'Служебный доступ',
+              'Мониторинг содержит технические события без текста личной переписки.',
             ],
           ].map(([title, text]) => (
             <Card key={title}>
@@ -155,10 +128,6 @@ export function OfflinePage() {
             Проверить подключение
           </Button>
         </div>
-        <p className={p.note}>
-          Очередь отправки офлайн-отметок не реализована. Демоданные остаются локальными и после
-          восстановления сети.
-        </p>
       </div>
     </>
   )
@@ -176,34 +145,6 @@ export function NotFoundPage() {
           Возможно, ссылка устарела. Ваши привычки можно открыть на экране «Сегодня».
         </EmptyState>
         <p className={p.muted}>Ошибка 404</p>
-      </div>
-    </>
-  )
-}
-export function ScreensPage() {
-  const { startDemo } = useApp()
-  return (
-    <>
-      <BackHeader title="Все экраны" to="/profile" />
-      <div className={`${p.page} ${p.wide}`}>
-        <PageTitle
-          title="Фронтенд Хабитона"
-          subtitle="Маршруты и состояния из дизайн-макетов. Все действия используют локальные демонстрационные данные."
-        />
-        <div className={p.screenGrid}>
-          {screenLinks.map(([to, label]) => (
-            <Link
-              key={to}
-              to={to}
-              onClick={() => {
-                if (to.startsWith('/admin')) startDemo('admin')
-                else if (!['/', '/login', '/signup', '/data', '/install'].includes(to)) startDemo()
-              }}
-            >
-              {label}
-            </Link>
-          ))}
-        </div>
       </div>
     </>
   )

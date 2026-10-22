@@ -1,21 +1,6 @@
 .layout {
   min-height: 100dvh;
 }
-.demoBar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  min-height: 32px;
-  padding: 0 22px;
-  color: var(--muted);
-  font-size: 11px;
-  border-bottom: 1px solid var(--border);
-}
-.demoBar button {
-  min-width: 44px;
-  min-height: 32px;
-}
 .header {
   display: flex;
   align-items: center;
@@ -85,12 +70,6 @@
   color: var(--brand);
   font-weight: 700;
 }
-.demoFooter {
-  font-size: 11px;
-  color: var(--muted);
-  padding: 12px 22px 100px;
-  text-align: center;
-}
 .offline {
   display: flex;
   align-items: center;
@@ -136,13 +115,13 @@
   .workspace {
     display: grid;
     grid-template-columns: 200px minmax(0, 1fr);
-    min-height: calc(100dvh - 190px);
+    min-height: calc(100dvh - 124px);
   }
   .navigation {
     position: sticky;
     top: 0;
     align-self: start;
-    height: calc(100dvh - 32px);
+    height: 100dvh;
     display: flex;
     flex-direction: column;
     padding: 24px 12px;
@@ -162,14 +141,8 @@
     max-width: 1100px;
     margin: 0 auto;
   }
-  .demoFooter {
-    padding: 14px;
-  }
   .toast {
     bottom: 28px;
-  }
-  .demoBar {
-    padding: 0 40px;
   }
 }
 @media (min-width: 1440px) {

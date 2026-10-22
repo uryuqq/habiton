@@ -6,7 +6,7 @@ import { BackHeader, Button, ConfirmDialog, Field, PageTitle, Tabs } from '../co
 import p from './Pages.module.css'
 
 export function ProfilePage() {
-  const { data, setData, setSession, resetDemo, startDemo } = useApp()
+  const { data, setSession } = useApp()
   const navigate = useNavigate()
   const [confirm, setConfirm] = useState(null)
   const sections = [
@@ -28,18 +28,6 @@ export function ProfilePage() {
   ]
   function confirmAction() {
     if (confirm === 'logout') {
-      setSession(null)
-      navigate('/')
-    }
-    if (confirm === 'reset') resetDemo()
-    if (confirm === 'delete') {
-      setData((current) => ({
-        ...current,
-        profile: { name: 'Гость', email: '' },
-        habits: [],
-        logs: [],
-        dialogues: [],
-      }))
       setSession(null)
       navigate('/')
     }
@@ -70,37 +58,17 @@ export function ProfilePage() {
         <Button variant="secondary" onClick={() => setConfirm('logout')}>
           Выйти
         </Button>
-        <Button variant="quiet" to="/admin" onClick={() => startDemo('admin')}>
-          Посмотреть демо админки
-        </Button>
-        <Button variant="quiet" onClick={() => setConfirm('reset')}>
-          Восстановить демоданные
-        </Button>
-        <button className={`${p.textButton} ${p.danger}`} onClick={() => setConfirm('delete')}>
-          Удалить локальные данные профиля
-        </button>
       </div>
-      <p className={p.note}>
-        Это локальная демонстрация: данные не отправляются на сервер и не синхронизируются между
-        устройствами.
+      <p className={p.muted} style={{ marginTop: 24, textAlign: 'center' }}>
+        Маленькие действия. Видимый рост.
       </p>
       {confirm && (
         <ConfirmDialog
-          title={
-            confirm === 'logout'
-              ? 'Выйти из демоверсии?'
-              : confirm === 'reset'
-                ? 'Восстановить примеры?'
-                : 'Удалить локальные данные?'
-          }
+          title="Выйти из аккаунта?"
           onClose={() => setConfirm(null)}
           onConfirm={confirmAction}
         >
-          {confirm === 'logout'
-            ? 'Ваши демоданные останутся в этом браузере.'
-            : confirm === 'reset'
-              ? 'Ваши изменения будут заменены исходным примером.'
-              : 'Привычки, отметки и диалоги этого демопрофиля будут удалены из текущего приложения.'}
+          Вы сможете вернуться к своим привычкам после входа.
         </ConfirmDialog>
       )}
     </>
@@ -147,7 +115,6 @@ export function SettingsPage() {
             items={[
               { value: 'light', label: 'Светлый' },
               { value: 'dark', label: 'Тёмный' },
-              { value: 'system', label: 'Системный' },
             ]}
             value={settings.theme}
             onChange={(theme) => setSettings((current) => ({ ...current, theme }))}
@@ -186,18 +153,10 @@ export function RemindersPage() {
           subtitle="О подходящем времени, которое вы выбрали сами."
         />
         <p className={p.note}>
-          Фоновая доставка уведомлений пока не подключена. Сохранённое время привычки — это
-          расписание, а не гарантированное уведомление.
-        </p>
-        <p>
-          В полной версии потребуется подключить серверную отправку и проверить поддержку
-          уведомлений на устройстве. Сейчас можно проверить внешний вид и настройку времени.
+          Напоминания пока недоступны. Вы можете указать подходящее время в расписании привычки.
         </p>
         <div className={p.actions}>
           <Button to="/habits">Посмотреть расписание</Button>
-          <Button variant="secondary" to="/install">
-            Установить приложение
-          </Button>
         </div>
       </div>
     </>

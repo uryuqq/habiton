@@ -124,14 +124,6 @@ export function HabitEditorPage() {
             ))}
           </select>
         </Field>
-        <Field label="Значок">
-          <select value={draft.symbol} onChange={(event) => update('symbol', event.target.value)}>
-            <option value="book">Книга</option>
-            <option value="water">Вода</option>
-            <option value="walk">Движение</option>
-            <option value="moon">Отдых</option>
-          </select>
-        </Field>
         <div className={p.row}>
           <h3>Какие дни?</h3>
           <button type="button" className={p.textButton} onClick={() => update('days', allDays)}>

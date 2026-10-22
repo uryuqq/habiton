@@ -30,10 +30,6 @@ export function AdminLayout() {
         ))}
       </nav>
       <Outlet />
-      <p className={p.note}>
-        Демонстрационная панель: изменения применяются только к локальным примерам. Настоящая
-        авторизация администратора появится с бэкендом.
-      </p>
     </div>
   )
 }
@@ -41,10 +37,10 @@ export function AdminOverviewPage() {
   const { data } = useApp()
   return (
     <>
-      <p className={p.periodTitle}>ДЕМОНСТРАЦИОННЫЕ ПОКАЗАТЕЛИ</p>
+      <p className={p.periodTitle}>ОБЩАЯ СТАТИСТИКА</p>
       <div className={p.stats}>
         {[
-          ['Аккаунты в примере', data.users.length],
+          ['Пользователи', data.users.length],
           ['Активные', data.users.filter((user) => !user.blocked).length],
           ['Обращения к ИИ', aiEvents.length],
           ['Ошибки ИИ', aiEvents.filter((event) => event.status !== 'Успешно').length],
@@ -52,7 +48,7 @@ export function AdminOverviewPage() {
           <Card key={label}>
             <p className={p.statLabel}>{label}</p>
             <div className={p.number}>{value}</div>
-            <p className={p.muted}>По демонстрационной выборке</p>
+            <p className={p.muted}>Всего</p>
           </Card>
         ))}
       </div>
@@ -109,7 +105,7 @@ export function AdminUsersPage() {
             <tr key={user.id}>
               <td data-label="Email">
                 {user.email}
-                <small>Пользователь · демо</small>
+                <small>Пользователь</small>
               </td>
               <td data-label="Статус">{user.blocked ? 'Заблокирован' : 'Активен'}</td>
               <td data-label="Действие">
@@ -128,7 +124,7 @@ export function AdminUsersPage() {
           onClose={() => setPending(null)}
           onConfirm={change}
         >
-          {pending.email} · действие изменит только демонстрационную запись.
+          {pending.email}
         </ConfirmDialog>
       )}
     </>
@@ -164,7 +160,7 @@ export function AdminAiPage() {
             <tr key={event.id}>
               <td data-label="ID" className={p.code}>
                 {event.id}
-                <small>09:10 · внешний сервис · пример</small>
+                <small>09:10 · внешний сервис</small>
               </td>
               <td data-label="Длительность">{event.duration}</td>
               <td data-label="Результат">{event.status}</td>
@@ -184,7 +180,7 @@ export function AdminAiPage() {
           }))
         }}
       >
-        <Field label="Системная инструкция · демо">
+        <Field label="Системная инструкция">
           <textarea
             required
             value={instruction}
@@ -361,7 +357,7 @@ export function AdminAuditPage() {
             <tr key={event.id}>
               <td data-label="Время">
                 {new Date(event.date).toLocaleString('ru-RU')}
-                <small>Демоадминистратор</small>
+                <small>admin@example.com</small>
               </td>
               <td data-label="Действие">{event.action}</td>
               <td data-label="Результат">{event.result}</td>
@@ -369,10 +365,7 @@ export function AdminAuditPage() {
           ))}
         </tbody>
       </table>
-      <p className={p.note}>
-        Журнал доступен только для чтения. Здесь регистрируются ваши действия с демонстрационными
-        данными.
-      </p>
+      <p className={p.note}>Журнал доступен только для чтения.</p>
     </>
   )
 }

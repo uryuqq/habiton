@@ -157,7 +157,7 @@ export function CoachPage({ error = false }) {
                 id: crypto.randomUUID(),
                 role: 'assistant',
                 text: ready
-                  ? 'Я подготовил пример из трёх привычек. Посмотрите и выберите подходящие.'
+                  ? 'Я подготовил план из трёх привычек. Посмотрите и выберите подходящие.'
                   : 'Когда вам удобнее выделить время? Начнём с небольшого действия.',
               },
             ],
@@ -172,7 +172,7 @@ export function CoachPage({ error = false }) {
       <Badge>План под вашу цель</Badge>
       <div className={s.chat}>
         <div className={s.message}>
-          <small>Хабитон · демопомощник</small>
+          <small>Хабитон</small>
           <p>Что вы хотите изменить? Можно начать с одной небольшой цели.</p>
         </div>
         {messages.map((item) => (
@@ -183,7 +183,7 @@ export function CoachPage({ error = false }) {
         ))}
         {loading && (
           <p role="status" className={p.muted}>
-            Готовим демонстрационный ответ…
+            Подготовка ответа…
           </p>
         )}
         <div ref={endRef} />
@@ -216,9 +216,6 @@ export function CoachPage({ error = false }) {
               </button>
             ))}
           </div>
-          <p className={p.note}>
-            Демонстрационный диалог: ответы подготовлены заранее, внешний ИИ не подключён.
-          </p>
           <form
             className={s.compose}
             onSubmit={(event) => {
@@ -244,9 +241,6 @@ export function CoachPage({ error = false }) {
           <div className={p.row}>
             <Link className={p.textButton} to="/history">
               История диалогов
-            </Link>
-            <Link className={p.textButton} to="/coach-error">
-              Пример ошибки
             </Link>
           </div>
         </>

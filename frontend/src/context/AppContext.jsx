@@ -140,7 +140,7 @@ export function AppProvider({ children }) {
         ...current.audit,
       ],
     }))
-    setToast('Изменение сохранено в деморежиме')
+    setToast('Изменение сохранено')
   }
   function startDemo(role = 'user', email) {
     setSession({ role })

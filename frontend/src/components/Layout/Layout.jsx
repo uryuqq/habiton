@@ -1,16 +1,7 @@
 import { asset } from '../../utils/assets'
 import { useEffect } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router'
-import {
-  House,
-  ChartNoAxesColumn,
-  MessageSquare,
-  UserRound,
-  Moon,
-  Sun,
-  WifiOff,
-} from 'lucide-react'
-import { usePwa } from '../../hooks/usePwa'
+import { WifiOff } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
 import { displayDate } from '../../utils/dates'
 import s from './Layout.module.css'
@@ -54,9 +45,8 @@ const titles = {
   '/offline': ['Без сети', 'Сохранённый вид'],
 }
 export function Layout() {
-  const { waiting, update } = usePwa()
   const { pathname } = useLocation()
-  const { session, data, settings, setSettings, online, today, toast } = useApp()
+  const { data, online, today, toast } = useApp()
   const config = titles[pathname]
   const isAdmin = pathname.startsWith('/admin')
   const withNavigation = Boolean(config && pathname !== '/offline')
@@ -69,25 +59,6 @@ export function Layout() {
       <a href="#main" className={s.skip}>
         Перейти к содержимому
       </a>
-      <div className={s.demoBar}>
-        <span>Демоверсия · данные на этом устройстве</span>
-        <button
-          aria-label="Переключить тему"
-          onClick={() =>
-            setSettings((current) => ({
-              ...current,
-              theme: document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark',
-            }))
-          }
-        >
-          {settings.theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-        </button>
-      </div>
-      {waiting && (
-        <div className={s.offline} role="status">
-          Доступна новая версия <button onClick={update}>Обновить приложение</button>
-        </div>
-      )}
       {!online && (
         <div className={s.offline} role="status">
           <WifiOff size={17} /> Без сети · доступен просмотр сохранённых данных{' '}
@@ -113,9 +84,8 @@ export function Layout() {
         <header className={`${s.header} ${s.adminHeader}`}>
           <div>
             <h1>Администрирование</h1>
-            <p>Хабитон · демонстрационная панель</p>
+            <p>Хабитон</p>
           </div>
-          <Link to="/today">В приложение</Link>
         </header>
       )}
       <div className={withNavigation ? s.workspace : ''}>
@@ -133,11 +103,6 @@ export function Layout() {
           <Outlet />
         </main>
       </div>
-      {session && (
-        <footer className={s.demoFooter}>
-          Деморежим · <Link to="/screens">Все экраны</Link> · <Link to="/install">Установить</Link>
-        </footer>
-      )}
       {toast && (
         <div role="status" className={s.toast}>
           {toast}

@@ -3,12 +3,11 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { ArrowRight } from 'lucide-react'
 import { useApp } from '../context/AppContext'
-import { BackHeader, Badge, Button, Card, Field, PageTitle, Plant } from '../components/UI/UI'
+import { BackHeader, Badge, Button, Card, Field, PageTitle } from '../components/UI/UI'
 import s from './PublicPages.module.css'
 import p from './Pages.module.css'
 
 export function LandingPage() {
-  const { startDemo } = useApp()
   return (
     <>
       <header className={s.header}>
@@ -71,15 +70,10 @@ export function LandingPage() {
           <Card>
             <h3>Под рукой, как приложение</h3>
             <p>«Хабитон» можно установить на телефон.</p>
-            <Link to="/install">
-              Как установить <ArrowRight size={16} />
+            <Link to="/data">
+              Как устроены данные <ArrowRight size={16} />
             </Link>
           </Card>
-          <div className={p.actions}>
-            <Button variant="secondary" to="/today" onClick={() => startDemo()}>
-              Посмотреть демоверсию
-            </Button>
-          </div>
         </div>
       </div>
     </>
@@ -126,7 +120,11 @@ export function AuthPage({ signup = false }) {
               required
             />
           </Field>
-          <Field label="Пароль" error={errors.password} hint="Не менее 8 символов">
+          <Field
+            label="Пароль"
+            error={errors.password}
+            hint={signup ? 'Не менее 8 символов' : undefined}
+          >
             <input
               type={visible ? 'text' : 'password'}
               autoComplete={signup ? 'new-password' : 'current-password'}
@@ -139,28 +137,13 @@ export function AuthPage({ signup = false }) {
           <button className={p.textButton} type="button" onClick={() => setVisible(!visible)}>
             {visible ? 'Скрыть пароль' : 'Показать пароль'}
           </button>
-          <p className={p.note}>
-            Демонстрационная форма. Аккаунт не создаётся, пароль не сохраняется и никуда не
-            отправляется. Для проверки используйте вымышленные данные.
-          </p>
           <Link className={p.textButton} to="/data">
             Информация о данных
           </Link>
           <div className={p.actions}>
-            <Button type="submit">
-              {signup ? 'Продолжить в деморежиме' : 'Войти в деморежим'}
-            </Button>
+            <Button type="submit">{signup ? 'Создать аккаунт' : 'Войти'}</Button>
             <Button variant="secondary" to={signup ? '/login' : '/signup'}>
               {signup ? 'У меня уже есть аккаунт' : 'Создать аккаунт'}
-            </Button>
-            <Button
-              variant="quiet"
-              onClick={() => {
-                startDemo()
-                navigate('/today')
-              }}
-            >
-              Открыть без заполнения
             </Button>
           </div>
         </form>
