@@ -30,7 +30,9 @@ npm run deploy
 
 Команда сначала собирает клиент с базовым адресом `/habiton/`, затем отправляет `dist` в ветку `gh-pages`. Для этого нужны созданный репозиторий, адрес `origin` и авторизация GitHub. В **Settings → Pages** выберите **Deploy from a branch → gh-pages → / (root)**.
 
-Будущий адрес: `https://ИМЯ_АККАУНТА.github.io/habiton/`. Это шаблон, не подтверждение публикации.
+Адрес GitHub Pages: https://uryuqq.github.io/habiton/
+
+Исходники: https://github.com/uryuqq/habiton
 
 Исходники остаются в основной ветке. Позже рядом с `frontend/` можно добавить `backend/`. GitHub Pages выполняет только статический фронтенд; Laravel потребуется отдельный PHP-хостинг.
 
