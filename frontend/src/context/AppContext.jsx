@@ -19,16 +19,17 @@ export function AppProvider({ children }) {
   const today = dateKey(new Date(clock), settings.timezone)
   useEffect(() => {
     // Добавляем роль в прежние сохранения, не сбрасывая привычки и отметки на телефоне.
-    if (data.profile.role) return
+    const isAlex = data.profile.name === 'Алексей' || data.profile.email === 'alex@example.com'
+    if (data.profile.role && (!isAlex || data.profile.role === 'admin')) return
     setData((current) => ({
       ...current,
-      profile: { ...current.profile, role: 'admin' },
+      profile: { ...current.profile, role: isAlex ? 'admin' : current.profile.role || 'user' },
       users: current.users.map((user) => ({
         ...user,
-        role: user.role || (user.id === 'u1' ? 'admin' : 'user'),
+        role: user.id === 'u1' ? 'admin' : user.role || 'user',
       })),
     }))
-  }, [data.profile.role, setData])
+  }, [data.profile.role, data.profile.name, data.profile.email, setData])
   useEffect(() => {
     const timer = setInterval(() => setClock(Date.now()), 60000)
     return () => clearInterval(timer)

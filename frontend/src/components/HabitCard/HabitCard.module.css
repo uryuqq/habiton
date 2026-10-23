@@ -1,4 +1,8 @@
 .card {
+  animation: habitAppear 180ms ease-out;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -7,6 +11,16 @@
   border-radius: 18px;
   background: var(--surface);
   min-width: 0;
+}
+@keyframes habitAppear {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 .done {
   background: var(--soft);

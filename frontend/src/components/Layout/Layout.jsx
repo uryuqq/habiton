@@ -1,7 +1,7 @@
 import { asset } from '../../utils/assets'
 import { useEffect } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router'
-import { WifiOff } from 'lucide-react'
+import { ChevronLeft, WifiOff } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
 import { displayDate } from '../../utils/dates'
 import s from './Layout.module.css'
@@ -87,7 +87,7 @@ export function Layout() {
             <p>Хабитон</p>
           </div>
           <Link to="/today" className={s.returnLink}>
-            В приложение
+            <ChevronLeft size={22} aria-hidden="true" />В приложение
           </Link>
         </header>
       )}

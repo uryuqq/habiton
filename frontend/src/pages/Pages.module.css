@@ -175,6 +175,7 @@
   margin: 12px 0;
 }
 .progress span {
+  transition: width 320ms ease;
   display: block;
   height: 100%;
   background: var(--brand);

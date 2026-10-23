@@ -52,11 +52,13 @@ export function AdminOverviewPage() {
           </Card>
         ))}
       </div>
-      <Card>
+      <Card className={s.alertCard}>
         <Badge>Требует внимания</Badge>
-        <h3>Ошибка внешнего сервиса</h3>
-        <p className={p.muted}>Посмотрите техническую причину в мониторинге.</p>
-        <Button variant="quiet" to="/admin/ai">
+        <div className={s.alertCopy}>
+          <h3>Ошибка внешнего сервиса</h3>
+          <p className={p.muted}>Посмотрите техническую причину в мониторинге.</p>
+        </div>
+        <Button variant="quiet" to="/admin/ai" className={s.alertAction}>
           Открыть события
         </Button>
       </Card>

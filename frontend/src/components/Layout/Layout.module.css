@@ -22,6 +22,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 6px;
   min-height: 44px;
   padding: 10px 16px;
   border: 1px solid var(--border);
@@ -93,6 +94,7 @@
   flex-wrap: wrap;
 }
 .toast {
+  animation: toastAppear 180ms ease-out;
   position: fixed;
   bottom: calc(100px + env(safe-area-inset-bottom));
   left: 50%;
@@ -106,6 +108,16 @@
   z-index: 50;
   box-shadow: 0 8px 28px #0002;
   font-size: 14px;
+}
+@keyframes toastAppear {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 6px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
 }
 .skip {
   position: fixed;

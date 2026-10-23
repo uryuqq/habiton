@@ -47,6 +47,9 @@
   color: var(--disabled-text);
   cursor: not-allowed;
 }
+.button:active:not(:disabled) {
+  transform: scale(0.98);
+}
 .textLink {
   display: inline-flex;
   align-items: center;
@@ -185,6 +188,9 @@
   cursor: pointer;
 }
 .checkbox > span:first-of-type {
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease;
   display: grid;
   place-items: center;
   width: 20px;
@@ -206,6 +212,17 @@
 }
 .checkbox input:checked + span .checkIcon {
   visibility: visible;
+  animation: checkAppear 180ms ease-out;
+}
+@keyframes checkAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.75);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 .checkbox input:focus-visible + span {
   outline: 3px solid var(--focus);
@@ -255,6 +272,19 @@
 }
 .modal::backdrop {
   background: #10251880;
+}
+.modal[open] {
+  animation: dialogAppear 180ms ease-out;
+}
+@keyframes dialogAppear {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 .modal h2 {
   font-size: 23px;

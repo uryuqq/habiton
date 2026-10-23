@@ -16,9 +16,14 @@ createRoot(document.getElementById('root')).render(
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
   window.addEventListener('load', async () => {
     try {
-      await navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`, {
-        updateViaCache: 'none',
-      })
+      const registration = await navigator.serviceWorker.register(
+        `${import.meta.env.BASE_URL}sw.js`,
+        {
+          updateViaCache: 'none',
+        },
+      )
+      // Проверяем обновления при запуске. Открытую форму при этом не перезагружаем.
+      await registration.update()
       await navigator.serviceWorker.ready
       window.dispatchEvent(new Event('habiton-offline-ready'))
     } catch (error) {
