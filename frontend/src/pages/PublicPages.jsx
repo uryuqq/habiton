@@ -69,9 +69,12 @@ export function LandingPage() {
           </div>
           <Card>
             <h3>Под рукой, как приложение</h3>
-            <p>«Хабитон» можно установить на телефон.</p>
-            <Link to="/data">
-              Как устроены данные <ArrowRight size={16} />
+            <p>
+              На iPhone откройте сайт в Safari, нажмите «Поделиться», выберите «На экран Домой» и
+              нажмите «Добавить».
+            </p>
+            <Link to="/install">
+              Как установить Хабитон <ArrowRight size={16} />
             </Link>
           </Card>
         </div>
