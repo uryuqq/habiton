@@ -16,5 +16,13 @@ export default defineConfig({
       },
     },
   ],
-  server: { host: true },
+  server: {
+    host: true,
+    proxy: {
+      '/api/': {
+        target: 'http://127.0.0.1:8081',
+        rewrite: (url) => url.replace(/^\/api\//, '/'),
+      },
+    },
+  },
 })

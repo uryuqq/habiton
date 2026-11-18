@@ -1,3 +1,4 @@
+import { GardenPlant } from '../components/UI/GardenPlant'
 import { useState } from 'react'
 import { Award, Leaf, LockKeyhole } from 'lucide-react'
 import { useApp } from '../context/AppContext'
@@ -18,7 +19,6 @@ import {
   Button,
   Card,
   PageTitle,
-  Plant,
   SectionHeading,
   Tabs,
 } from '../components/UI/UI'
@@ -153,7 +153,7 @@ export function GardenPage() {
     <>
       <div className={p.garden}>
         <Badge>{xp < 150 ? 'Первый росток' : 'Молодое растение'}</Badge>
-        <Plant />
+        <GardenPlant xp={xp} />
         <h2>Всё растёт понемногу</h2>
         <p>
           Ваши небольшие действия

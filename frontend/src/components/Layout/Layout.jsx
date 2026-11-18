@@ -56,7 +56,14 @@ export function Layout() {
   }, [pathname, isAdmin, config])
   return (
     <div className={s.layout}>
-      <a href="#main" className={s.skip}>
+      <a
+        href="#main"
+        className={s.skip}
+        onClick={(event) => {
+          event.preventDefault()
+          document.getElementById('main')?.focus()
+        }}
+      >
         Перейти к содержимому
       </a>
       {!online && (

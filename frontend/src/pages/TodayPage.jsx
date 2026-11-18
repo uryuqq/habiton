@@ -1,3 +1,4 @@
+import { GardenPlant } from '../components/UI/GardenPlant'
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { Plus } from 'lucide-react'
@@ -9,7 +10,7 @@ import s from './TodayPage.module.css'
 import p from './Pages.module.css'
 
 export function TodayPage({ empty = false, rest = false }) {
-  const { data, today, toggleLog, online } = useApp()
+  const { data, today, toggleLog, online, busy } = useApp()
   const [selected, setSelected] = useState(today)
   const start = addDays(today, -weekday(today))
   const dates = weekLabels.map((label, index) => ({ label, date: addDays(start, index) }))
@@ -95,7 +96,7 @@ export function TodayPage({ empty = false, rest = false }) {
                 key={habit.id}
                 habit={habit}
                 onToggle={selected === today ? () => toggleLog(habit.id) : undefined}
-                disabled={!online}
+                disabled={!online || busy}
               />
             ))}
           </div>
@@ -109,7 +110,7 @@ export function TodayPage({ empty = false, rest = false }) {
                     habit={habit}
                     done
                     onToggle={selected === today ? () => toggleLog(habit.id) : undefined}
-                    disabled={!online}
+                    disabled={!online || busy}
                   />
                 ))}
               </div>
@@ -135,7 +136,7 @@ export function TodayPage({ empty = false, rest = false }) {
               {150 - ((data.logs.length * 10) % 150)} опыта
             </p>
           </div>
-          <Plant small />
+          <GardenPlant xp={data.logs.length * 10} small />
         </Link>
       </div>
     </>

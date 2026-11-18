@@ -327,3 +327,39 @@
     font-size: 32px;
   }
 }
+
+.plantGrowth,
+.plantSway {
+  transform-box: view-box;
+  transform-origin: 50% 69%;
+}
+
+.plantGrowth {
+  transform: scale(var(--plant-growth));
+  transition: transform 900ms ease-out;
+  animation: plantGrow 900ms ease-out;
+}
+
+.plantSway {
+  animation: plantSway 5s ease-in-out infinite;
+}
+
+@keyframes plantGrow {
+  from {
+    transform: scale(calc(var(--plant-growth) * 0.88));
+  }
+}
+
+@keyframes plantSway {
+  0%,
+  50%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(3deg);
+  }
+  75% {
+    transform: rotate(-3deg);
+  }
+}

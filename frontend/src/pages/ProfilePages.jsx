@@ -6,7 +6,7 @@ import { BackHeader, Button, ConfirmDialog, Field, PageTitle, Tabs } from '../co
 import p from './Pages.module.css'
 
 export function ProfilePage() {
-  const { data, setSession } = useApp()
+  const { data, setSession, serverMode, run } = useApp()
   const navigate = useNavigate()
   const [confirm, setConfirm] = useState(null)
   const sections = [
@@ -34,8 +34,9 @@ export function ProfilePage() {
       icon: ShieldCheck,
     })
   }
-  function confirmAction() {
+  async function confirmAction() {
     if (confirm === 'logout') {
+      if (serverMode && !(await run('logout', {}))) return
       setSession(null)
       navigate('/')
     }
@@ -84,12 +85,16 @@ export function ProfilePage() {
   )
 }
 export function SettingsPage() {
-  const { data, setData, settings, setSettings, setToast } = useApp()
+  const { data, setData, settings, setSettings, setToast, serverMode, run, busy } = useApp()
   const [name, setName] = useState(data.profile.name)
-  function save(event) {
+  async function save(event) {
     event.preventDefault()
     if (!name.trim()) return
-    setData((current) => ({ ...current, profile: { ...current.profile, name: name.trim() } }))
+    if (serverMode) {
+      if (!(await run('profile', { name: name.trim() }))) return
+    } else {
+      setData((current) => ({ ...current, profile: { ...current.profile, name: name.trim() } }))
+    }
     setToast('Настройки сохранены на этом устройстве')
   }
   return (
@@ -146,7 +151,9 @@ export function SettingsPage() {
           />
         </label>
         <div className={p.actions}>
-          <Button type="submit">Сохранить настройки</Button>
+          <Button type="submit" disabled={busy}>
+            Сохранить настройки
+          </Button>
         </div>
       </form>
     </>

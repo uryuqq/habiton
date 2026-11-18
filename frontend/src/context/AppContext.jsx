@@ -2,11 +2,23 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import { useLocalStorage } from '../hooks/useLocalStorage'
 import { createDemoData } from '../data/demo'
 import { addDays, dateKey } from '../utils/dates'
+import { api, serverMode } from '../utils/api'
 
 const AppContext = createContext(null)
 const initialData = createDemoData()
+const emptyData = {
+  profile: { name: '', email: '', role: 'guest' },
+  habits: [],
+  logs: [],
+  dialogues: [],
+  users: [],
+  templates: [],
+  audit: [],
+  aiEvents: [],
+  instruction: '',
+}
 export function AppProvider({ children }) {
-  const [data, setData] = useLocalStorage('habiton-demo-v2', initialData)
+  const [demoData, setDemoData] = useLocalStorage('habiton-demo-v2', initialData)
   const [session, setSession] = useLocalStorage('habiton-demo-session', null)
   const [settings, setSettings] = useLocalStorage('habiton-settings-v2', {
     theme: 'light',
@@ -16,9 +28,56 @@ export function AppProvider({ children }) {
   const [online, setOnline] = useState(navigator.onLine)
   const [clock, setClock] = useState(Date.now())
   const [toast, setToast] = useState('')
+  const [serverData, setServerData] = useState(null)
+  const [ready, setReady] = useState(!serverMode)
+  const [loadError, setLoadError] = useState('')
+  const [retryCount, setRetryCount] = useState(0)
+  const [busy, setBusy] = useState(false)
+  const data = serverMode ? serverData || emptyData : demoData
+  const setData = serverMode ? setServerData : setDemoData
+
+  async function run(action, body) {
+    setBusy(true)
+    try {
+      const result = await api(action, { ...body, timezone: settings.timezone })
+      setServerData(result.data)
+      return result
+    } catch (error) {
+      if (error.dialogues) {
+        setServerData((current) => ({ ...current, dialogues: error.dialogues }))
+      }
+      if (error.status === 401 && action !== 'login') setServerData(null)
+      setToast(error.message)
+      return null
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  useEffect(() => {
+    if (!serverMode || !online) return
+    let active = true
+    api()
+      .then(({ data }) => {
+        if (active) {
+          setServerData(data)
+          setLoadError('')
+        }
+      })
+      .catch(() => {
+        if (active) setLoadError('Не удалось подключиться к серверу Хабитона.')
+      })
+      .finally(() => {
+        if (active) setReady(true)
+      })
+    return () => {
+      active = false
+    }
+  }, [online, retryCount])
   const today = dateKey(new Date(clock), settings.timezone)
   useEffect(() => {
     // Добавляем роль в прежние сохранения, не сбрасывая привычки и отметки на телефоне.
+    if (serverMode) return
     const isAlex = data.profile.name === 'Алексей' || data.profile.email === 'alex@example.com'
     if (data.profile.role && (!isAlex || data.profile.role === 'admin')) return
     setData((current) => ({
@@ -64,6 +123,14 @@ export function AppProvider({ children }) {
     return () => clearTimeout(timer)
   }, [toast])
   function toggleLog(habitId) {
+    if (serverMode) {
+      if (!busy)
+        return run('mark', {
+          id: habitId,
+          done: !data.logs.some((log) => log.habitId === habitId && log.date === today),
+        })
+      return
+    }
     if (!online) {
       setToast('Без сети доступен просмотр. Для отметки восстановите подключение.')
       return
@@ -78,7 +145,12 @@ export function AppProvider({ children }) {
       }
     })
   }
-  function saveHabit(draft, id) {
+  async function saveHabit(draft, id) {
+    if (serverMode) {
+      const result = await run('habit', { ...draft, id })
+      if (result) setToast(id ? 'Привычка изменена' : 'Привычка добавлена')
+      return result?.id
+    }
     const habitId = id || crypto.randomUUID()
     setData((current) => {
       const previous = current.habits.find((habit) => habit.id === id)
@@ -109,7 +181,12 @@ export function AppProvider({ children }) {
     setToast(id ? 'Привычка изменена' : 'Привычка добавлена')
     return habitId
   }
-  function archiveHabit(id, restore = false) {
+  async function archiveHabit(id, restore = false) {
+    if (serverMode) {
+      const result = await run('archive', { id, restore })
+      if (result) setToast(restore ? 'Привычка восстановлена' : 'Привычка в архиве')
+      return
+    }
     setData((current) => ({
       ...current,
       habits: current.habits.map((habit) => {
@@ -169,6 +246,13 @@ export function AppProvider({ children }) {
     <AppContext.Provider
       value={{
         data,
+        serverMode,
+        authenticated: Boolean(serverData),
+        ready,
+        busy,
+        loadError,
+        retryConnection: () => setRetryCount((count) => count + 1),
+        run,
         setData,
         session,
         setSession,

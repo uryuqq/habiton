@@ -55,7 +55,7 @@ export function HabitsPage() {
 }
 export function HabitEditorPage() {
   const { id } = useParams()
-  const { data, saveHabit, online } = useApp()
+  const { data, saveHabit, online, busy } = useApp()
   const navigate = useNavigate()
   const habit = data.habits.find((item) => item.id === id)
   const [draft, setDraft] = useState(() => ({
@@ -73,14 +73,18 @@ export function HabitEditorPage() {
     setDraft((current) => ({ ...current, [key]: value }))
     setDirty(true)
   }
-  function submit(event) {
+  async function submit(event) {
     event.preventDefault()
     const next = {}
     if (!draft.title.trim()) next.title = 'Напишите небольшое действие'
     if (!draft.days.length) next.days = 'Выберите хотя бы один день'
     setErrors(next)
     if (Object.keys(next).length || !online) return
-    const savedId = saveHabit({ ...draft, title: draft.title.trim(), note: draft.note.trim() }, id)
+    const savedId = await saveHabit(
+      { ...draft, title: draft.title.trim(), note: draft.note.trim() },
+      id,
+    )
+    if (!savedId) return
     setDirty(false)
     navigate(`/habits/${savedId}`)
   }
@@ -163,7 +167,7 @@ export function HabitEditorPage() {
         </Field>
         {!online && <p className={p.note}>Сохранение доступно после восстановления сети.</p>}
         <div className={p.actions}>
-          <Button type="submit" disabled={!online}>
+          <Button type="submit" disabled={!online || busy}>
             {id ? 'Сохранить изменения' : 'Добавить привычку'}
           </Button>
           <Button

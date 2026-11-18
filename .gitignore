@@ -12,3 +12,8 @@ dist/
 .env.*
 !.env.example
 *.log
+
+!/Dockerfile
+!/.dockerignore
+!/railway.json
+!/deploy/

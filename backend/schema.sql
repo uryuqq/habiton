@@ -1,0 +1,54 @@
+CREATE DATABASE IF NOT EXISTS habiton CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE habiton;
+
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(60) NOT NULL,
+    email VARCHAR(254) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    role ENUM('user', 'admin') NOT NULL DEFAULT 'user',
+    blocked BOOLEAN NOT NULL DEFAULT FALSE
+);
+CREATE TABLE IF NOT EXISTS habits (
+    user_id INT NOT NULL,
+    id VARCHAR(36) NOT NULL,
+    details JSON NOT NULL,
+    PRIMARY KEY (user_id, id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+CREATE TABLE IF NOT EXISTS logs (
+    user_id INT NOT NULL,
+    habit_id VARCHAR(36) NOT NULL,
+    date DATE NOT NULL,
+    PRIMARY KEY (user_id, habit_id, date),
+    FOREIGN KEY (user_id, habit_id) REFERENCES habits(user_id, id) ON DELETE CASCADE
+);
+CREATE TABLE IF NOT EXISTS dialogues (
+    user_id INT NOT NULL,
+    id VARCHAR(36) NOT NULL,
+    details JSON NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+CREATE TABLE IF NOT EXISTS templates (
+    id VARCHAR(36) PRIMARY KEY,
+    details JSON NOT NULL
+);
+CREATE TABLE IF NOT EXISTS settings (
+    name VARCHAR(50) PRIMARY KEY,
+    value TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS ai_events (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    duration_ms INT NOT NULL,
+    status VARCHAR(40) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS audit (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    action VARCHAR(250) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);

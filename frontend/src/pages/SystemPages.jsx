@@ -74,6 +74,7 @@ export function InstallPage() {
   )
 }
 export function DataPage() {
+  const { serverMode } = useApp()
   return (
     <>
       <BackHeader title="О ваших данных" to="/profile" />
@@ -83,15 +84,21 @@ export function DataPage() {
           {[
             [
               'Учётная запись',
-              'Имя и email используются в профиле. Пароль не сохраняется на устройстве.',
+              serverMode
+                ? 'Имя и email хранятся на сервере. Пароль хранится в виде хеша.'
+                : 'Имя и email используются в профиле. Пароль не сохраняется на устройстве.',
             ],
             [
               'Привычки и отметки',
-              'Расписание и история сохраняются в этом браузере, чтобы показывать ваш прогресс. Очистка данных сайта удалит их.',
+              serverMode
+                ? 'Расписание и история сохраняются на сервере и доступны после входа.'
+                : 'Расписание и история сохраняются в этом браузере, чтобы показывать ваш прогресс. Очистка данных сайта удалит их.',
             ],
             [
               'Диалоги',
-              'Историю сообщений можно открыть в разделе помощника. Она сохраняется на этом устройстве.',
+              serverMode
+                ? 'История хранится на сервере. Для ответа помощника часть переписки передаётся Qwen.'
+                : 'Историю сообщений можно открыть в разделе помощника. Она сохраняется на этом устройстве.',
             ],
             [
               'Служебный доступ',
@@ -109,22 +116,27 @@ export function DataPage() {
   )
 }
 export function OfflinePage() {
-  const { online } = useApp()
+  const { online, serverMode, authenticated, loadError, retryConnection } = useApp()
+  const connected = online && !loadError
+  const canRead = !serverMode || (authenticated && !loadError)
   return (
     <>
       <BackHeader title="Без сети" />
       <div className={p.page}>
         <EmptyState
-          title={online ? 'Подключение доступно' : 'Ваши привычки на месте'}
+          title={
+            connected ? 'Подключение доступно' : online ? 'Сервер недоступен' : 'Нет подключения'
+          }
           image={<Plant />}
         >
-          Сохранённые данные доступны для просмотра. Для изменения привычек и новых отметок
-          восстановите подключение.
+          {canRead
+            ? 'Сохранённые данные доступны для просмотра. Для изменений восстановите подключение.'
+            : 'Подключитесь к интернету, чтобы открыть привычки. Данные хранятся на сервере.'}
         </EmptyState>
-        <Badge>{online ? 'Сеть доступна' : 'Офлайн'}</Badge>
+        <Badge>{connected ? 'Сеть доступна' : online ? 'Нет связи с сервером' : 'Офлайн'}</Badge>
         <div className={p.actions}>
-          <Button to="/today">Открыть сохранённый день</Button>
-          <Button variant="secondary" onClick={() => window.location.reload()}>
+          {(connected || canRead) && <Button to="/today">Открыть мой день</Button>}
+          <Button variant="secondary" onClick={retryConnection} disabled={!online}>
             Проверить подключение
           </Button>
         </div>

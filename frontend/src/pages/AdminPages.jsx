@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, NavLink, Outlet, useNavigate, useParams } from 'react-router'
 import { useApp } from '../context/AppContext'
-import { allDays, aiEvents } from '../data/demo'
+import { allDays, aiEvents as demoEvents } from '../data/demo'
 import { weekLabels } from '../utils/dates'
 import { Badge, Button, Card, ConfirmDialog, Field, PageTitle, Tabs } from '../components/UI/UI'
 import { NotFoundPage } from './SystemPages'
@@ -34,7 +34,8 @@ export function AdminLayout() {
   )
 }
 export function AdminOverviewPage() {
-  const { data } = useApp()
+  const { data, serverMode } = useApp()
+  const aiEvents = serverMode ? data.aiEvents : demoEvents
   return (
     <>
       <p className={p.periodTitle}>ОБЩАЯ СТАТИСТИКА</p>
@@ -52,27 +53,33 @@ export function AdminOverviewPage() {
           </Card>
         ))}
       </div>
-      <Card className={s.alertCard}>
-        <Badge>Требует внимания</Badge>
-        <div className={s.alertCopy}>
-          <h3>Ошибка внешнего сервиса</h3>
-          <p className={p.muted}>Посмотрите техническую причину в мониторинге.</p>
-        </div>
-        <Button variant="quiet" to="/admin/ai" className={s.alertAction}>
-          Открыть события
-        </Button>
-      </Card>
+      {aiEvents.some((event) => event.status !== 'Успешно') && (
+        <Card className={s.alertCard}>
+          <Badge>Требует внимания</Badge>
+          <div className={s.alertCopy}>
+            <h3>Ошибка внешнего сервиса</h3>
+            <p className={p.muted}>Посмотрите техническую причину в мониторинге.</p>
+          </div>
+          <Button variant="quiet" to="/admin/ai" className={s.alertAction}>
+            Открыть события
+          </Button>
+        </Card>
+      )}
     </>
   )
 }
 export function AdminUsersPage() {
-  const { data, recordAdmin } = useApp()
+  const { data, recordAdmin, serverMode, run, busy } = useApp()
   const [search, setSearch] = useState('')
   const [pending, setPending] = useState(null)
   const users = data.users.filter((user) =>
     user.email.toLowerCase().includes(search.trim().toLowerCase()),
   )
-  function change() {
+  async function change() {
+    if (serverMode) {
+      if (await run('block', { id: pending.id, blocked: !pending.blocked })) setPending(null)
+      return
+    }
     recordAdmin(
       `${pending.blocked ? 'Разблокировка' : 'Блокировка'} ${pending.email}`,
       (current) => ({
@@ -111,7 +118,11 @@ export function AdminUsersPage() {
               </td>
               <td data-label="Статус">{user.blocked ? 'Заблокирован' : 'Активен'}</td>
               <td data-label="Действие">
-                <button className={p.textButton} onClick={() => setPending(user)}>
+                <button
+                  className={p.textButton}
+                  disabled={busy || (serverMode && user.role === 'admin')}
+                  onClick={() => setPending(user)}
+                >
                   {user.blocked ? 'Разблокировать' : 'Блокировать'}
                 </button>
               </td>
@@ -133,9 +144,10 @@ export function AdminUsersPage() {
   )
 }
 export function AdminAiPage() {
-  const { data, recordAdmin } = useApp()
+  const { data, recordAdmin, serverMode, run, busy } = useApp()
   const [filter, setFilter] = useState('all')
   const [instruction, setInstruction] = useState(data.instruction)
+  const aiEvents = serverMode ? data.aiEvents : demoEvents
   const events =
     filter === 'errors' ? aiEvents.filter((event) => event.status !== 'Успешно') : aiEvents
   return (
@@ -162,7 +174,7 @@ export function AdminAiPage() {
             <tr key={event.id}>
               <td data-label="ID" className={p.code}>
                 {event.id}
-                <small>09:10 · внешний сервис</small>
+                <small>{serverMode ? event.date : '09:10 · внешний сервис'}</small>
               </td>
               <td data-label="Длительность">{event.duration}</td>
               <td data-label="Результат">{event.status}</td>
@@ -170,12 +182,14 @@ export function AdminAiPage() {
           ))}
         </tbody>
       </table>
-      <p className={p.note}>
-        req-0141: превышено время ожидания. Полный текст диалога и ключи здесь не отображаются.
-      </p>
+      <p className={p.note}>Полный текст диалога и ключи здесь не отображаются.</p>
       <form
         onSubmit={(event) => {
           event.preventDefault()
+          if (serverMode) {
+            run('instruction', { instruction })
+            return
+          }
           recordAdmin('Изменение системной инструкции ИИ', (current) => ({
             ...current,
             instruction: instruction.trim(),
@@ -190,7 +204,7 @@ export function AdminAiPage() {
             maxLength={4000}
           />
         </Field>
-        <Button type="submit" disabled={!instruction.trim()}>
+        <Button type="submit" disabled={busy || !instruction.trim()}>
           Сохранить инструкцию
         </Button>
       </form>
@@ -198,7 +212,7 @@ export function AdminAiPage() {
   )
 }
 export function AdminTemplatesPage() {
-  const { data, recordAdmin } = useApp()
+  const { data, recordAdmin, serverMode, run, busy } = useApp()
   return (
     <>
       <div className={p.stack}>
@@ -218,16 +232,19 @@ export function AdminTemplatesPage() {
               </Link>
               <button
                 className={p.textButton}
+                disabled={busy}
                 onClick={() =>
-                  recordAdmin(
-                    `${template.active ? 'Отключение' : 'Включение'} шаблона ${template.title}`,
-                    (current) => ({
-                      ...current,
-                      templates: current.templates.map((item) =>
-                        item.id === template.id ? { ...item, active: !item.active } : item,
-                      ),
-                    }),
-                  )
+                  serverMode
+                    ? run('template', { ...template, active: !template.active })
+                    : recordAdmin(
+                        `${template.active ? 'Отключение' : 'Включение'} шаблона ${template.title}`,
+                        (current) => ({
+                          ...current,
+                          templates: current.templates.map((item) =>
+                            item.id === template.id ? { ...item, active: !item.active } : item,
+                          ),
+                        }),
+                      )
                 }
               >
                 {template.active ? 'Отключить' : 'Включить'}
@@ -244,7 +261,7 @@ export function AdminTemplatesPage() {
 }
 export function AdminTemplateEditorPage() {
   const { id } = useParams()
-  const { data, recordAdmin } = useApp()
+  const { data, recordAdmin, serverMode, run, busy } = useApp()
   const navigate = useNavigate()
   const previous = data.templates.find((item) => item.id === id)
   const [draft, setDraft] = useState(
@@ -258,9 +275,13 @@ export function AdminTemplateEditorPage() {
     },
   )
   if (id && !previous) return <NotFoundPage />
-  function save(event) {
+  async function save(event) {
     event.preventDefault()
     if (!draft.title.trim() || !draft.days.length) return
+    if (serverMode) {
+      if (await run('template', { ...draft, id })) navigate('/admin/templates')
+      return
+    }
     recordAdmin(`${id ? 'Изменение' : 'Создание'} шаблона ${draft.title.trim()}`, (current) => ({
       ...current,
       templates: id
@@ -331,7 +352,7 @@ export function AdminTemplateEditorPage() {
           />
         </Field>
         <div className={p.actions}>
-          <Button type="submit" disabled={!draft.title.trim() || !draft.days.length}>
+          <Button type="submit" disabled={busy || !draft.title.trim() || !draft.days.length}>
             Сохранить шаблон
           </Button>
           <Button variant="secondary" to="/admin/templates">

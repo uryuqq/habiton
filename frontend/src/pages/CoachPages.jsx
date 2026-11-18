@@ -22,11 +22,16 @@ export function OnboardingPage() {
   const [goal, setGoal] = useState('Больше читать')
   const [custom, setCustom] = useState('')
   const [minutes, setMinutes] = useState(10)
-  const { setData } = useApp()
+  const { setData, serverMode, run, busy } = useApp()
   const navigate = useNavigate()
-  function start() {
+  async function start() {
     const title = goal === 'Своя цель' ? custom.trim() : goal
     if (!title) return
+    if (serverMode) {
+      const result = await run('dialogue', { title, minutes })
+      if (result) navigate(`/coach?dialogue=${result.id}`)
+      return
+    }
     const dialogue = {
       id: crypto.randomUUID(),
       title,
@@ -86,7 +91,7 @@ export function OnboardingPage() {
         </div>
         <p className={p.muted}>Начнём с посильного. План можно изменить.</p>
         <div className={p.actions}>
-          <Button onClick={start} disabled={goal === 'Своя цель' && !custom.trim()}>
+          <Button onClick={start} disabled={busy || (goal === 'Своя цель' && !custom.trim())}>
             Составить план <ArrowRight size={20} />
           </Button>
           <Button variant="secondary" to="/habits/new">
@@ -98,21 +103,35 @@ export function OnboardingPage() {
   )
 }
 export function CoachPage({ error = false }) {
-  const { data, setData, online } = useApp()
+  const { data, setData, online, serverMode, run } = useApp()
   const [params, setParams] = useSearchParams()
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
   const endRef = useRef(null)
   const timer = useRef(null)
   const currentId = params.get('dialogue')
-  const dialogue = data.dialogues.find((item) => item.id === currentId) || data.dialogues[0]
+  const dialogue = params.has('new')
+    ? undefined
+    : currentId
+      ? data.dialogues.find((item) => item.id === currentId)
+      : data.dialogues[0]
   const messages = dialogue?.messages || []
   useEffect(() => () => clearTimeout(timer.current), [])
   useEffect(() => {
     if (messages.length) endRef.current?.scrollIntoView({ block: 'nearest' })
   }, [messages.length, loading])
-  function send(text) {
+  async function send(text) {
     if (!text.trim() || loading || !online) return
+    if (serverMode) {
+      setLoading(true)
+      const result = await run('message', { id: dialogue?.id, text: text.trim() })
+      if (result) {
+        setParams({ dialogue: result.id })
+        setMessage('')
+      }
+      setLoading(false)
+      return
+    }
     const id = dialogue?.id || crypto.randomUUID()
     const title = dialogue?.title || text.trim().slice(0, 80)
     const user = { id: crypto.randomUUID(), role: 'user', text: text.trim() }
@@ -218,7 +237,7 @@ export function CoachPage({ error = false }) {
           </div>
           <form
             className={s.compose}
-            onSubmit={(event) => {
+            onSubmit={async (event) => {
               event.preventDefault()
               send(message)
             }}
@@ -239,6 +258,17 @@ export function CoachPage({ error = false }) {
             </button>
           </form>
           <div className={p.row}>
+            <button
+              type="button"
+              className={p.textButton}
+              disabled={loading}
+              onClick={() => {
+                setMessage('')
+                setParams({ new: '1' })
+              }}
+            >
+              Новый чат
+            </button>
             <Link className={p.textButton} to="/history">
               История диалогов
             </Link>
@@ -249,7 +279,7 @@ export function CoachPage({ error = false }) {
   )
 }
 export function PlanPage() {
-  const { data, setData, savePlan, online } = useApp()
+  const { data, setData, savePlan, online, serverMode, run, busy } = useApp()
   const [params] = useSearchParams()
   const dialogue =
     data.dialogues.find((item) => item.id === params.get('dialogue')) || data.dialogues[0]
@@ -260,9 +290,10 @@ export function PlanPage() {
   const [editing, setEditing] = useState(null)
   const [savedPreview, setSavedPreview] = useLocalStorage('habiton-plan-preview-saved', false)
   const navigate = useNavigate()
-  const plan = dialogue?.plan.length ? dialogue.plan : preview
-  const saved = dialogue?.saved || savedPreview
-  function update(items) {
+  const plan = serverMode ? dialogue?.plan || [] : dialogue?.plan.length ? dialogue.plan : preview
+  const saved = dialogue?.plan.length ? dialogue.saved : !serverMode && savedPreview
+  async function update(items) {
+    if (serverMode) return run('plan', { id: dialogue?.id, plan: items })
     if (dialogue?.plan.length)
       setData((current) => ({
         ...current,
@@ -272,8 +303,12 @@ export function PlanPage() {
       }))
     else setPreview(items)
   }
-  function save() {
-    if (saved || !online) return
+  async function save() {
+    if (saved || !online || busy) return
+    if (serverMode) {
+      if (await run('save-plan', { id: dialogue?.id })) navigate('/today')
+      return
+    }
     savePlan(plan)
     if (dialogue)
       setData((current) => ({
@@ -287,10 +322,14 @@ export function PlanPage() {
   }
   return (
     <>
-      <BackHeader title="Ваш план" to="/coach" />
+      <BackHeader title="Ваш план" to={dialogue ? `/coach?dialogue=${dialogue.id}` : '/coach'} />
       <div className={p.page}>
         <PageTitle
-          badge={`Цель: ${dialogue?.title || 'больше времени для себя'}`}
+          badge={
+            serverMode
+              ? dialogue?.planGoal && `Цель: ${dialogue.planGoal}`
+              : `Цель: ${dialogue?.title || 'больше времени для себя'}`
+          }
           title={
             <>
               Небольшой план.
@@ -307,7 +346,7 @@ export function PlanPage() {
                 <Checkbox
                   label={`Выбрать: ${item.title}`}
                   checked={item.selected}
-                  disabled={saved}
+                  disabled={saved || busy}
                   onChange={() =>
                     update(
                       plan.map((entry) =>
@@ -326,7 +365,7 @@ export function PlanPage() {
               </p>
               <button
                 className={p.textButton}
-                disabled={saved}
+                disabled={saved || busy}
                 onClick={() => setEditing({ ...item })}
               >
                 Изменить <ArrowRight size={16} />
@@ -340,7 +379,10 @@ export function PlanPage() {
             : `Выбрано ${plan.filter((item) => item.selected).length} из ${plan.length} привычек`}
         </p>
         <div className={p.actions}>
-          <Button disabled={saved || !plan.some((item) => item.selected) || !online} onClick={save}>
+          <Button
+            disabled={busy || saved || !plan.some((item) => item.selected) || !online}
+            onClick={save}
+          >
             Добавить в мой день
           </Button>
         </div>
@@ -348,10 +390,13 @@ export function PlanPage() {
       {editing && (
         <Modal title="Изменить предложение" onClose={() => setEditing(null)}>
           <form
-            onSubmit={(event) => {
+            onSubmit={async (event) => {
               event.preventDefault()
               if (!editing.title.trim() || !editing.days.length) return
-              update(plan.map((item) => (item.id === editing.id ? editing : item)))
+              const result = await update(
+                plan.map((item) => (item.id === editing.id ? editing : item)),
+              )
+              if (serverMode && !result) return
               setEditing(null)
             }}
           >
@@ -396,7 +441,7 @@ export function PlanPage() {
                 onChange={(event) => setEditing({ ...editing, time: event.target.value })}
               />
             </Field>
-            <Button type="submit" disabled={!editing.title.trim() || !editing.days.length}>
+            <Button type="submit" disabled={busy || !editing.title.trim() || !editing.days.length}>
               Сохранить предложение
             </Button>
           </form>

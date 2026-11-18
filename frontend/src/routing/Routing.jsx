@@ -1,3 +1,4 @@
+import { useApp } from '../context/AppContext'
 import { Navigate, Route, Routes } from 'react-router'
 import { Layout } from '../components/Layout/Layout'
 import { LandingPage, AuthPage } from '../pages/PublicPages'
@@ -18,6 +19,15 @@ import {
 } from '../pages/AdminPages'
 
 export function Routing() {
+  const { serverMode, authenticated, ready, online, loadError, data } = useApp()
+  function privatePage(page, admin = false) {
+    if (!serverMode) return page
+    if (loadError || (!online && !authenticated)) return <OfflinePage />
+    if (!ready) return <p role="status">Загрузка…</p>
+    if (!authenticated) return <Navigate to="/login" replace />
+    if (admin && data.profile.role !== 'admin') return <Navigate to="/profile" replace />
+    return page
+  }
   return (
     <Routes>
       <Route element={<Layout />}>
@@ -27,26 +37,26 @@ export function Routing() {
         <Route path="install" element={<InstallPage />} />
         <Route path="data" element={<DataPage />} />
         <Route path="offline" element={<OfflinePage />} />
-        <Route path="today" element={<TodayPage />} />
-        <Route path="empty" element={<TodayPage empty />} />
-        <Route path="rest" element={<TodayPage rest />} />
-        <Route path="habits" element={<HabitsPage />} />
-        <Route path="habits/new" element={<HabitEditorPage key="new" />} />
-        <Route path="habits/:id" element={<HabitDetailPage />} />
-        <Route path="habits/:id/edit" element={<HabitEditorPage />} />
-        <Route path="onboarding" element={<OnboardingPage />} />
-        <Route path="coach" element={<CoachPage />} />
-        <Route path="coach-error" element={<CoachPage error />} />
-        <Route path="plan" element={<PlanPage />} />
-        <Route path="history" element={<HistoryPage />} />
-        <Route path="progress" element={<ProgressPage />} />
-        <Route path="calendar" element={<CalendarPage />} />
-        <Route path="garden" element={<GardenPage />} />
-        <Route path="achievements" element={<AchievementsPage />} />
-        <Route path="profile" element={<ProfilePage />} />
-        <Route path="settings" element={<SettingsPage />} />
-        <Route path="reminders" element={<RemindersPage />} />
-        <Route path="admin" element={<AdminLayout />}>
+        <Route path="today" element={privatePage(<TodayPage />)} />
+        <Route path="empty" element={privatePage(<TodayPage empty />)} />
+        <Route path="rest" element={privatePage(<TodayPage rest />)} />
+        <Route path="habits" element={privatePage(<HabitsPage />)} />
+        <Route path="habits/new" element={privatePage(<HabitEditorPage key="new" />)} />
+        <Route path="habits/:id" element={privatePage(<HabitDetailPage />)} />
+        <Route path="habits/:id/edit" element={privatePage(<HabitEditorPage />)} />
+        <Route path="onboarding" element={privatePage(<OnboardingPage />)} />
+        <Route path="coach" element={privatePage(<CoachPage />)} />
+        <Route path="coach-error" element={privatePage(<CoachPage error />)} />
+        <Route path="plan" element={privatePage(<PlanPage />)} />
+        <Route path="history" element={privatePage(<HistoryPage />)} />
+        <Route path="progress" element={privatePage(<ProgressPage />)} />
+        <Route path="calendar" element={privatePage(<CalendarPage />)} />
+        <Route path="garden" element={privatePage(<GardenPage />)} />
+        <Route path="achievements" element={privatePage(<AchievementsPage />)} />
+        <Route path="profile" element={privatePage(<ProfilePage />)} />
+        <Route path="settings" element={privatePage(<SettingsPage />)} />
+        <Route path="reminders" element={privatePage(<RemindersPage />)} />
+        <Route path="admin" element={privatePage(<AdminLayout />, true)}>
           <Route index element={<AdminOverviewPage />} />
           <Route path="users" element={<AdminUsersPage />} />
           <Route path="ai" element={<AdminAiPage />} />

@@ -83,20 +83,24 @@ export function LandingPage() {
   )
 }
 export function AuthPage({ signup = false }) {
-  const { startDemo } = useApp()
+  const { startDemo, serverMode, run, busy } = useApp()
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [visible, setVisible] = useState(false)
   const [errors, setErrors] = useState({})
-  function submit(event) {
+  async function submit(event) {
     event.preventDefault()
     const next = {}
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) next.email = 'Введите корректный адрес почты'
     if (password.length < 8) next.password = 'Введите не менее 8 символов'
     setErrors(next)
     if (Object.keys(next).length) return
-    startDemo('user', email.trim())
+    if (serverMode) {
+      if (!(await run(signup ? 'signup' : 'login', { email: email.trim(), password }))) return
+    } else {
+      startDemo('user', email.trim())
+    }
     setPassword('')
     navigate(signup ? '/onboarding' : '/today')
   }
@@ -140,11 +144,10 @@ export function AuthPage({ signup = false }) {
           <button className={p.textButton} type="button" onClick={() => setVisible(!visible)}>
             {visible ? 'Скрыть пароль' : 'Показать пароль'}
           </button>
-          <Link className={p.textButton} to="/data">
-            Информация о данных
-          </Link>
           <div className={p.actions}>
-            <Button type="submit">{signup ? 'Создать аккаунт' : 'Войти'}</Button>
+            <Button type="submit" disabled={busy}>
+              {signup ? 'Создать аккаунт' : 'Войти'}
+            </Button>
             <Button variant="secondary" to={signup ? '/login' : '/signup'}>
               {signup ? 'У меня уже есть аккаунт' : 'Создать аккаунт'}
             </Button>
